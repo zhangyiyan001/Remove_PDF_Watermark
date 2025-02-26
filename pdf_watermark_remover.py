@@ -49,33 +49,40 @@ def pdf_to_png(pdf_path, output_folder):
         print(f"错误: PDF文件 '{pdf_path}' 不存在")
         return False
     
-    # 打开PDF文件
-    pdf_document = fitz.open(pdf_path)
-    
-    # 创建输出文件夹
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-        print(f"创建输出文件夹: {output_folder}")
-    
-    # 遍历PDF中的每一页
-    for page_num in range(pdf_document.page_count):
-        # 获取当前页面
-        page = pdf_document.load_page(page_num)
+    try:
+        # 打开PDF文件
+        pdf_document = fitz.open(pdf_path)
+        total_pages = pdf_document.page_count
         
-        # 将页面转换为pixmap（图像对象）
-        pix = page.get_pixmap(dpi=600)  # 可调整dpi参数以控制输出图像的分辨率
+        # 创建输出文件夹
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+            print(f"创建输出文件夹: {output_folder}")
         
-        # 输出图片的文件路径
-        output_path = os.path.join(output_folder, f"page_{page_num + 1}.png")
+        # 遍历PDF中的每一页
+        for page_num in range(total_pages):
+            # 获取当前页面
+            page = pdf_document.load_page(page_num)
+            
+            # 将页面转换为pixmap（图像对象）
+            pix = page.get_pixmap(dpi=600)  # 可调整dpi参数以控制输出图像的分辨率
+            
+            # 输出图片的文件路径
+            output_path = os.path.join(output_folder, f"page_{page_num + 1}.png")
+            
+            # 将pixmap保存为PNG图片
+            pix.save(output_path)
+            print(f"页面 {page_num + 1}/{total_pages} 已保存为 {output_path}")
         
-        # 将pixmap保存为PNG图片
-        pix.save(output_path)
-        print(f"页面 {page_num + 1}/{pdf_document.page_count} 已保存为 {output_path}")
-    
-    # 关闭PDF文件
-    pdf_document.close()
-    print(f"PDF转换完成! 共转换了 {pdf_document.page_count} 页")
-    return True
+        print(f"PDF转换完成! 共转换了 {total_pages} 页")
+        
+        # 关闭PDF文件
+        pdf_document.close()
+        return True
+        
+    except Exception as e:
+        print(f"转换PDF时出错: {e}")
+        return False
 
 def replace_rgb_with_white(image_folder):
     """
